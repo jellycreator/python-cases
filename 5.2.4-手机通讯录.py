@@ -11,7 +11,7 @@ while True:
 6.退出\n\
 =============\
     ')
-    choice = input('您的操作是')
+    choice = input('您的操作是:')
 
 
     if choice == '1':
@@ -36,7 +36,7 @@ while True:
         print('\
 -------------------------------------------------------')
         if dict_arbook != {}:
-            print('姓名      电话号码         邮箱         地址')
+            print('姓名--电话号码--邮箱--地址')
             for i in dict_arbook.keys():
                 print(i , end='     ')
                 for j in dict_arbook[i]:
@@ -120,10 +120,11 @@ while True:
         elif temp in dict_arbook.keys():
             print('\
 -------------------------------------------------------')
-            print('姓名      电话号码         邮箱         地址')
+            print('姓名--电话号码--邮箱--地址')
             print(temp , end='     ')
             for i in dict_arbook[temp]:
                 print(i , end='     ')
+            print()
             print('\
 -------------------------------------------------------')
         else:
