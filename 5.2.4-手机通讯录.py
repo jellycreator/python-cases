@@ -69,44 +69,48 @@ while True:
         print('\
 ------------------------------')
         temp = input('请输入你要修改的联系人:')
-        name = input('请输入新的姓名:')
-        phonenum = input('请输入新的手机号:')
-        email = input('请输入新的邮箱:')
-        address = input('请输入新的地址:')
-
-        if dict_arbook == {}:
-            print('通讯录无信息')
-        #1.不存在新姓名,沿用原有键
-        elif name == '':
-            count = 0
-            for i in [phonenum , email , address]:
-                if i != '':
-                    dict_arbook[temp][count] = i
-                    count += 1
-                    continue
-                elif i == '':
-                    count += 1
-                    continue
-                else:
-                    print('未知错误4')
-        #2.存在新姓名,对原键值克隆都新键上,并将原键值删去
-        elif name != '':
-            #依据temp寻找键值,原键所对应的列表
-            dict_arbook[name] = dict_arbook[temp]
-            count = 0
-            for i in [phonenum , email , address]:
-                if i != '':
-                    dict_arbook[name][count] = i
-                    count += 1
-                    continue
-                elif i == '':
-                    count += 1
-                    continue
-                else:
-                    print('未知错误5')
-            dict_arbook.pop(temp)
+        if temp not in dict_arbook.keys():
+            print('不存在该联系人')
         else:
-            print('未知错误6')
+            name = input('请输入新的姓名:')
+            phonenum = input('请输入新的手机号:')
+            email = input('请输入新的邮箱:')
+            address = input('请输入新的地址:')
+
+            if dict_arbook == {}:
+                print('通讯录无信息')
+            #1.不存在新姓名,沿用原有键
+            elif name == '':
+                count = 0
+                for i in [phonenum , email , address]:
+                    if i != '':
+                        dict_arbook[temp][count] = i
+                        count += 1
+                        continue
+                    elif i == '':
+                        count += 1
+                        continue
+                    else:
+                        print('未知错误4')
+            #2.存在新姓名,对原键值克隆都新键上,并将原键值删去
+            elif name != '':
+                #依据temp寻找键值,原键所对应的列表
+                dict_arbook[name] = dict_arbook[temp]
+                count = 0
+                for i in [phonenum , email , address]:
+                    if i != '':
+                        dict_arbook[name][count] = i
+                        count += 1
+                        continue
+                    elif i == '':
+                        count += 1
+                        continue
+                    else:
+                        print('未知错误5')
+                dict_arbook.pop(temp)
+            else:
+                print('未知错误6')
+            print('修改成功')
         print('\
 ------------------------------')
 
