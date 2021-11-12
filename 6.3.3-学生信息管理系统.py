@@ -34,8 +34,11 @@ def stu_remove(remove=''):
     if stu_dict == {}:
         print('系统无信息')
     else:
-        stu_dict.pop(remove)
-        print('删除成功')
+        try:
+            stu_dict.pop(remove)
+            print('删除成功')
+        except:
+            print('该学生不在系统中')
 
 while True:
     print('======================')
