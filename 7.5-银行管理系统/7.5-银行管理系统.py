@@ -28,20 +28,18 @@ class Bank():
         else:
             self.switch = False
             self.__del__(del_options=False)
-    
-    #暂时先用类内部的列表
+
     #类属性
     li_name = []            #名字
     li_id_number =[]        #身份证
     li_phonenumber = []     #电话号码
     li_account = []         #账号
     li_password = []        #密码
-    li_money = []           #钱
+    li_money = []           #钱-整型
     __count = 2             #定义私有属性账户密码容错次数
     __mistake_password_count = {}         #定义私有属性账户冻结计数字典{账号:密码错误次数}
 
-
-    # 定义开户方法
+    # 开户方法
     def open_account(self,name='',id_number='', phonenumber='', money='', password=''):
         #当任何一个信息缺少时都不可开户
         if name == '' or id_number == '' or phonenumber == '' or money == '' or password == '':
@@ -68,10 +66,8 @@ class Bank():
                     #继续执行循环获取6位数的账号
                     continue
 
-# importance:冻结的步骤单独出一个方法
-    
-    # 定义查询功能方法
-    def inquiry(self, inquiry_account='', inquiry_password=''):
+    # 冻结计数方法
+    def dongjie(self, inquiry_account='', inquiry_password=''):
         #判断账号是否在账号列表中
         if inquiry_account not in self.li_account:
             print('该账户不存在')
@@ -93,9 +89,10 @@ class Bank():
                 if self.li_account[inquiry_account_index] in self.__mistake_password_count.keys() and self.__mistake_password_count[inquiry_account] > 0:
                     # 从冻结字典中删除该成功进入的账户
                     self.__mistake_password_count.pop(inquiry_account)
-                    print('账户%s还有%s元' % (self.li_account[inquiry_account_index],self.li_money[inquiry_account_index]))
+                    # 返回真值
+                    return True
                 else:
-                    print('账户%s还有%s元' % (self.li_account[inquiry_account_index],self.li_money[inquiry_account_index]))
+                    return True
             # 账号对不上密码时,触发账号冻结计数,若该输错密码的账号不在冻结计数字典内,则向字典中添加
             elif self.li_account[inquiry_account_index] not in self.__mistake_password_count.keys():
                 self.__mistake_password_count[inquiry_account] = self.__count
@@ -104,41 +101,28 @@ class Bank():
             else:
                 pass
 
-    # 定义取款方法
-    def withdraw(self):
-        #判断账号是否在账号列表中
-        if inquiry_account not in self.li_account:
-            print('该账户不存在')
+    # 查询功能方法
+    def inquiry(self, inquiry_account=''):
+        # 获取账户的账号索引
+        inquiry_account_index = self.li_account.index(inquiry_account)
+        print('账户%s还有%s元' % (self.li_account[inquiry_account_index],self.li_money[inquiry_account_index]))
+
+    # 取款方法
+    def withdraw(self, inquiry_account='', withdraw_money=''):
+        # 获取账户的账号索引
+        inquiry_account_index = self.li_account.index(inquiry_account)
+        if self.li_money[inquiry_account_index] >= withdraw_money:
+            self.li_money[inquiry_account_index] -= withdraw_money
+            print('取款成功,账户%s余额有%d元' % (self.li_account[inquiry_account_index], self.li_money[inquiry_account_index]))
         else:
-            # 获取账户的账号索引
-            inquiry_account_index = self.li_account.index(inquiry_account)
-            # 当账户处在冻结字典中
-            if self.li_account[inquiry_account_index] in self.__mistake_password_count.keys():
-                #如果该账户冻结计数为零,则进行下面的操作
-                if self.__mistake_password_count[inquiry_account] == 1:
-                    print('错误次数过多,账户%s已冻结' % inquiry_account)
-                # 冻结字典中已存在该账户,且未冻结
-                else:
-                    self.__mistake_password_count[inquiry_account] -= 1
-                    print('密码错误,还有%d次机会' % self.__mistake_password_count[inquiry_account])
-            # 当账号和密码都对上时
-            elif inquiry_password == self.li_password[inquiry_account_index]:
-                # 当该账户存在冻结次数且未被冻结时
-                if self.li_account[inquiry_account_index] in self.__mistake_password_count.keys() and self.__mistake_password_count[inquiry_account] > 0:
-                    # 从冻结字典中删除该成功进入的账户
-                    self.__mistake_password_count.pop(inquiry_account)
-                    print('账户%s还有%s元' % (self.li_account[inquiry_account_index],self.li_money[inquiry_account_index]))
-                else:
-                    print('账户%s还有%s元' % (self.li_account[inquiry_account_index],self.li_money[inquiry_account_index]))
-            # 账号对不上密码时,触发账号冻结计数,若该输错密码的账号不在冻结计数字典内,则向字典中添加
-            elif self.li_account[inquiry_account_index] not in self.__mistake_password_count.keys():
-                self.__mistake_password_count[inquiry_account] = self.__count
-                print('密码错误,还有%d次机会' % self.__mistake_password_count[inquiry_account])
-            # 容错
-            else:
-                pass
-    #存款
+            print('余额不足')
+
     #转账
+    def zhuanzhang(self, inquiry_account='', inquiry_password=''):
+        if self.dongjie(inquiry_account=inquiry_account, inquiry_password=inquiry_password) == True:
+            pass
+        else:
+            pass
     #锁定
 
     #解锁
@@ -170,11 +154,12 @@ while bank.switch:
     print('8.存盘')
     print('9.退出')
     choice = input('请输入操作:')
-    
+
     #开户
     if choice == '1':
         print('进入开户系统,输入/b退出')
         while True:
+            quit_temp = 0
             name = input('请输入姓名:')
             if name == '/b':
                 break
@@ -187,11 +172,25 @@ while bank.switch:
             money = input('请输入预存金额:')
             if money == '/b':
                 break
+            else:
+                try:
+                    money = int(money)
+                    if money >= 0:
+                        continue
+                    else:
+                        print('金额不能为负')
+                        quit_temp = 1
+                except:
+                    print('金额只能为阿拉伯数字')
+                    quit_temp = 1
             password = input('请输入密码:')
             if password == '/b':
                 break
-            bank.open_account(name=name, id_number=id_number, phonenumber=phonenumber, money=money, password=password)
-    
+            if quit_temp != 1:
+                bank.open_account(name=name, id_number=id_number, phonenumber=phonenumber, money=money, password=password)
+            else:
+                pass
+
     #查询
     elif choice == '2':
         print('进入查询系统,输入/b退出')
@@ -202,8 +201,38 @@ while bank.switch:
             inquiry_password = input('请输入密码:')
             if inquiry_password == '/b':
                 break
+            if bank.dongjie(inquiry_account=inquiry_account, inquiry_password=inquiry_password) == True:
+                bank.inquiry(inquiry_account=inquiry_account)
             else:
-                bank.inquiry(inquiry_account=inquiry_account, inquiry_password=inquiry_password)
+                continue
+
+    # 取款
+    elif choice == '3':
+        print('进入取款系统,输入/b退出')
+        while True:
+            inquiry_account = input('请输入卡号:')
+            if inquiry_account == '/b':
+                break
+            inquiry_password = input('请输入密码:')
+            if inquiry_password == '/b':
+                break
+            # 取款操作页面
+            while bank.dongjie(inquiry_account=inquiry_account, inquiry_password=inquiry_password) == True:
+                inquiry_account_index = bank.li_account.index(inquiry_account)
+                print('进入取款页面,输入/b返回上一步')
+                print('账户%s余额有%d元' % (bank.li_account[inquiry_account_index], bank.li_money[inquiry_account_index]))
+                withdraw_money = input('请输入取款金额:')
+                if withdraw_money == '/b':
+                    break
+                else:
+                    # 在这里加入对取款金额是否可以转为整型的判断
+                    try:
+                        withdraw_money = int(withdraw_money)
+                        bank.withdraw(inquiry_account=inquiry_account, withdraw_money=withdraw_money)
+                    except:
+                        print('请输入正确的金额(仅含阿拉伯数字)')
+            else:
+                continue
 
     #退出
     elif choice == '9':
