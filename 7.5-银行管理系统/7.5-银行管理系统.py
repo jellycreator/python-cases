@@ -1,4 +1,5 @@
 import random
+import sys,os
 #bug
 """
 Exception ignored in: <function Bank.__del__ at 0x000001F474FD16C0>
@@ -10,18 +11,17 @@ class Bank():
     #类属性   
     __ad_account = 'admin'      #管理员账号
     __ad_password = '123456'    #管理员密码
+    __count = 2                 #定义私有属性账户密码容错次数    
     li_name = []                #名字-字符串
     li_id_number =[]            #身份证-字符串
     li_phonenumber = []         #电话号码-字符串
     li_account = []             #账号-字符串
     li_password = []            #密码-字符串
     li_money = []               #钱-整型
-    __count = 2                 #定义私有属性账户密码容错次数
     __freeze_dict = {}          #定义私有属性账户冻结计数字典{账号:密码错误次数}
-
-
-
-
+    
+    path = sys.path[0]
+    
     # 对象被释放时的显示
     def __del__(self, del_options=''):
         self.del_options = del_options
@@ -36,6 +36,93 @@ class Bank():
         self.ad_password = ad_password
         if self.ad_account == self.__ad_account and self.ad_password == self.__ad_password:
             self.switch = True
+            # 默认文件存在的情况
+            try:
+                # 从li_name.txt中获取列表 li_name
+                with open(self.path + os.sep + 'li_name' + '.txt', 'r', encoding='utf-8') as file:
+                    for line in file.readlines():
+                        line = line.replace('\n','')
+                        if line != '':
+                            self.li_name.append(line)
+                        else:
+                            continue
+
+                # 从 li_id_number.txt中获取列表 li_id_number
+                with open(self.path + os.sep + 'li_id_number' + '.txt', 'r', encoding='utf-8') as file:
+                    for line in file.readlines():
+                        line = line.replace('\n','')
+                        if line != '':
+                            self.li_id_number.append(line)
+                        else:
+                            continue
+
+                # 从 li_phonenumber.txt中获取列表 li_phonenumber
+                with open(self.path + os.sep + 'li_phonenumber' + '.txt', 'r', encoding='utf-8') as file:
+                    for line in file.readlines():
+                        line = line.replace('\n','')
+                        if line != '':
+                            self.li_phonenumber.append(line)
+                        else:
+                            continue
+
+                # 从 li_account.txt中获取列表 li_account
+                with open(self.path + os.sep + 'li_account' + '.txt', 'r', encoding='utf-8') as file:
+                    for line in file.readlines():
+                        line = line.replace('\n','')
+                        if line != '':
+                            self.li_account.append(line)
+                        else:
+                            continue
+                
+                # 从 li_password.txt中获取列表 li_password
+                with open(self.path + os.sep + 'li_password' + '.txt', 'r', encoding='utf-8') as file:         
+                    for line in file.readlines():
+                        line = line.replace('\n','')
+                        if line != '':
+                            self.li_password.append(line)
+                        else:
+                            continue
+
+                # 从 li_money.txt中获取列表 li_money
+                with open(self.path + os.sep + 'li_money' + '.txt', 'r', encoding='utf-8') as file:       
+                    for line in file.readlines():
+                        line = line.replace('\n','')
+                        if line != '':
+                            self.li_money.append(int(line))
+                        else:
+                            continue
+                
+                # 读取冻结键列表
+                with open(self.path + os.sep + 'freeze_dict_keys.txt', 'r', encoding='utf-8') as file:
+                    freeze_dict_keys = []
+                    for line in file.readlines():
+                        line = line.replace('\n','')
+                        if line != '':
+                            freeze_dict_keys.append(line)
+                        else:
+                            continue
+                
+                # 读取冻结值列表
+                with open(self.path + os.sep + 'freeze_dict_values.txt', 'r', encoding='utf-8') as file:
+                    freeze_dict_values = []
+                    for line in file.readlines():
+                        line = line.replace('\n','')
+                        if line != '':
+                            freeze_dict_values.append(int(line))
+                        else:
+                            continue
+                    print(freeze_dict_values)
+                
+                # 将冻结键值列表合并成字典
+                index = 0
+                while True:
+                    try:
+                        self.freeze_dict[freeze_dict_keys[index]] = freeze_dict_values[index]
+                        index += 1
+                    except:
+                        break
+            except:
+                pass
             print('进入系统成功')
         else:
             self.switch = False
@@ -177,7 +264,40 @@ class Bank():
 
     #存盘
     def cunpan(self):
-        pass
+        # 保存 li_name
+        with open(self.path + os.sep + 'li_name' + '.txt', 'w', encoding='utf-8') as file:
+            for i in self.li_name:
+                file.write(i+'\n')
+
+        # 保存 li_id_number
+        with open(self.path + os.sep + 'li_id_number' + '.txt', 'w', encoding='utf-8') as file:
+            for i in self.li_id_number:
+                file.write(i+'\n')
+        
+        # 保存 li_phonenumber
+        with open(self.path + os.sep + 'li_phonenumber' + '.txt', 'w', encoding='utf-8') as file:
+            for i in self.li_phonenumber:
+                file.write(i+'\n')
+        
+        # 保存 li_account
+        with open(self.path + os.sep + 'li_account' + '.txt', 'w', encoding='utf-8') as file:
+            for i in self.li_account:
+                file.write(i+'\n')
+        
+        # 保存 li_password
+        with open(self.path + os.sep + 'li_password' + '.txt', 'w', encoding='utf-8') as file:
+            for i in self.li_password:
+                file.write(i+'\n')
+        
+        # 保存 冻结字典键
+        with open(self.path + os.sep + 'freeze_dict_keys' + '.txt', 'w', encoding='utf-8') as file:
+            for i in self.freeze_dict.keys():
+                file.write(i+'\n')
+        
+        # 保存 冻结字典值
+        with open(self.path + os.sep + 'freeze_dict_values' + '.txt', 'w', encoding='utf-8') as file:
+            for i in self.freeze_dict.values():
+                file.write(str(i)+'\n')
 
     #退出
     def bank_quit(self, ad_account='', ad_password=''):
