@@ -7,9 +7,21 @@ TypeError: Bank.__del__() missing 1 required positional argument: 'del_options'
 
 
 class Bank():
-    __ad_account = 'admin'
-    __ad_password = '123456'
-    
+    #类属性   
+    __ad_account = 'admin'      #管理员账号
+    __ad_password = '123456'    #管理员密码
+    li_name = []                #名字-字符串
+    li_id_number =[]            #身份证-字符串
+    li_phonenumber = []         #电话号码-字符串
+    li_account = []             #账号-字符串
+    li_password = []            #密码-字符串
+    li_money = []               #钱-整型
+    __count = 2                 #定义私有属性账户密码容错次数
+    __freeze_dict = {}          #定义私有属性账户冻结计数字典{账号:密码错误次数}
+
+
+
+
     # 对象被释放时的显示
     def __del__(self, del_options=''):
         self.del_options = del_options
@@ -28,16 +40,6 @@ class Bank():
         else:
             self.switch = False
             self.__del__(del_options=False)
-
-    #类属性
-    li_name = []            #名字
-    li_id_number =[]        #身份证
-    li_phonenumber = []     #电话号码
-    li_account = []         #账号
-    li_password = []        #密码
-    li_money = []           #钱-整型
-    __count = 2             #定义私有属性账户密码容错次数
-    __freeze_dict = {}      #定义私有属性账户冻结计数字典{账号:密码错误次数}
 
     # 开户方法
     def open_account(self,name='',id_number='', phonenumber='', money='', password=''):
@@ -101,13 +103,13 @@ class Bank():
             else:
                 pass
 
-    # 查询功能方法
+    # 查询
     def inquiry(self, inquiry_account=''):
         # 获取账户的账号索引
         inquiry_account_index = self.li_account.index(inquiry_account)
         print('账户%s还有%s元' % (self.li_account[inquiry_account_index],self.li_money[inquiry_account_index]))
 
-    # 取款方法
+    # 取款
     def withdraw(self, inquiry_account='', withdraw_money=''):
         # 获取账户的账号索引
         inquiry_account_index = self.li_account.index(inquiry_account)
@@ -125,8 +127,18 @@ class Bank():
         print('存款成功,账户%s余额有%d元' % (self.li_account[inquiry_account_index], self.li_money[inquiry_account_index]))
 
     # 转账
-    def transfer(self, inquiry_account='', inquiry_password=''):
-        pass
+    def transfer(self, inquiry_account='', receive_account='', transfer_money=''):
+        # 获取账户的账号索引
+        inquiry_account_index = self.li_account.index(inquiry_account)
+        receive_account_index = self.li_account.index(receive_account)
+        if transfer_money <= self.li_money[inquiry_account_index]:
+            # 第一步,从转出账户扣除转账金额
+            self.li_money[inquiry_account_index] -= transfer_money
+            # 第二步,向转入账户增加转账金额
+            self.li_money[receive_account_index] += transfer_money
+            print('转账成功,转出账户%s剩余%d元' % (self.li_account[inquiry_account_index], self.li_money[inquiry_account_index]))
+        else:
+            print('账户%s余额不足' % self.li_account[inquiry_account_index])
 
     #锁定
     def lock(self, inquiry_account='',inquiry_password=''):
@@ -136,30 +148,36 @@ class Bank():
         else:
             # 获取账户的账号索引
             inquiry_account_index = self.li_account.index(inquiry_account)
-            # 当账户处在冻结字典中
-            if self.li_account[inquiry_account_index] in self.__freeze_dict.keys():
-                #如果该账户冻结计数为零,则进行下面的操作
-                if self.__freeze_dict[inquiry_account] == 1:
-                    print('错误次数过多,账户%s已冻结' % inquiry_account)
-                # 冻结字典中已存在该账户,且未冻结
-                else:
-                    self.__freeze_dict[inquiry_account] -= 1
-                    print('密码错误,还有%d次机会' % self.__freeze_dict[inquiry_account])
-            # 当账号和密码都对上时
-            elif inquiry_password == self.li_password[inquiry_account_index]:
+            if inquiry_password == self.li_password[inquiry_account_index]:
                 self.__freeze_dict[inquiry_account] = 1
                 print('账户%s已冻结' % inquiry_account)
-            # 账号对不上密码时,触发账号冻结计数,若该输错密码的账号不在冻结计数字典内,则向字典中添加
-            elif self.li_account[inquiry_account_index] not in self.__freeze_dict.keys():
-                self.__freeze_dict[inquiry_account] = self.__count
-                print('密码错误,还有%d次机会' % self.__freeze_dict[inquiry_account])
-            # 容错
             else:
-                pass
+                print('密码不正确')
                 
     #解锁
-    
+    def unlock(self, inquiry_account='', inquiry_password=''):
+        #判断账号是否在账号列表中
+        if inquiry_account not in self.li_account:
+            print('该账户不存在')
+        else:
+            # 获取账户的账号索引
+            inquiry_account_index = self.li_account.index(inquiry_account)
+            if inquiry_password == self.li_password[inquiry_account_index]:
+                if inquiry_account not in self.__freeze_dict.keys():
+                    print('该账户未被冻结')
+                else:
+                    if self.__freeze_dict[inquiry_account] != 1:
+                        self.__freeze_dict.pop(inquiry_account)
+                        print('账户%s的密码错误次数已重置' % inquiry_account)
+                    else:
+                        self.__freeze_dict.pop(inquiry_account)
+                        print('账户%s已解冻' % inquiry_account)
+            else:
+                print('密码不正确')
+
     #存盘
+    def cunpan(self):
+        pass
 
     #退出
     def bank_quit(self, ad_account='', ad_password=''):
@@ -168,7 +186,7 @@ class Bank():
         else:
             return False
     
-#交互操作
+#交互操作,以下部分以后可以用GUI界面代替
 while True:
     ad_account = input('请输入管理员账户:')
     ad_password = input('请输入管理员密码:')
@@ -294,19 +312,43 @@ while bank.switch:
             else:
                 continue
 
-    # 转账@
+    # 转账
     elif choice == '5':
-        inquiry_account = input('请输入卡号:')
-        if inquiry_account == '/b':
-            break
-        inquiry_password = input('请输入密码:')
-        if inquiry_password == '/b':
-            break
-        # 存款操作页面
-        while bank.freeze(inquiry_account=inquiry_account, inquiry_password=inquiry_password) == True:
-            inquiry_account_index = bank.li_account.index(inquiry_account)
-            break
-    
+        print('进入转账系统,输入/b退出')
+        while True:
+            inquiry_account = input('请输入卡号:')
+            if inquiry_account == '/b':
+                break
+            inquiry_password = input('请输入密码:')
+            if inquiry_password == '/b':
+                break
+            # 转账操作页面
+            while bank.freeze(inquiry_account=inquiry_account, inquiry_password=inquiry_password) == True:
+                    inquiry_account_index = bank.li_account.index(inquiry_account)
+                    print('进入转账页面,输入/b返回上一步')
+                    print('账户%s余额有%d元' % (bank.li_account[inquiry_account_index], bank.li_money[inquiry_account_index]))
+                    receive_account = input('请输入转入卡号:')
+                    if receive_account == '/b':
+                        break
+                    elif receive_account not in bank.li_account():
+                        print('转入账号不存在')
+                        continue
+                    else:
+                        print('进入转账操作,输入/b返回上一步')
+                        while True:
+                            transfer_money = input('请输入转账金额:')
+                            if transfer_money == '/b':
+                                break
+                            else:
+                                try:
+                                    transfer_money = int(transfer_money)
+                                    bank.transfer(inquiry_account=inquiry_account, receive_account=receive_account, transfer_money=transfer_money)
+                                except:
+                                    print('请输入正确的转账金额(仅含阿拉伯数字)')
+                                    continue
+            else:
+                continue
+
     # 锁定
     elif choice == '6':
         print('进入锁定系统,输入/b退出')
@@ -319,13 +361,21 @@ while bank.switch:
                 break
             bank.lock(inquiry_account=inquiry_account,inquiry_password=inquiry_password)
     
-    # 解锁@
+    # 解锁
     elif choice == '7':
-        pass
+        print('进入解锁系统,输入/b退出')
+        while True:
+            inquiry_account = input('请输入卡号:')
+            if inquiry_account == '/b':
+                break
+            inquiry_password = input('请输入密码:')
+            if inquiry_password == '/b':
+                break
+            bank.unlock(inquiry_account=inquiry_account,inquiry_password=inquiry_password)
 
-    # 存盘@
+    # 存盘
     elif choice == '8':
-        pass
+        bank.cunpan()
 
     #退出
     elif choice == '9':
