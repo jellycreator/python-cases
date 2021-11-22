@@ -163,38 +163,44 @@ class Bank():
         else:
             # 获取账户的账号索引
             inquiry_account_index = self.li_account.index(inquiry_account)
-            # 当账户处在冻结字典中
-            if self.li_account[inquiry_account_index] in self.__freeze_dict.keys():
-                #如果该账户冻结计数为零,则进行下面的操作
-                if self.__freeze_dict[inquiry_account] == 1:
-                    print('错误次数过多,账户%s已冻结' % inquiry_account)
-                # 冻结字典中已存在该账户,且未冻结
-                else:
-                    self.__freeze_dict[inquiry_account] -= 1
-                    print('密码错误,还有%d次机会' % self.__freeze_dict[inquiry_account])
-            # 当账号和密码都对上时
-            elif inquiry_password == self.li_password[inquiry_account_index]:
-                # 当该账户存在冻结次数且未被冻结时
-                if self.li_account[inquiry_account_index] in self.__freeze_dict.keys() and self.__freeze_dict[inquiry_account] > 0:
-                    # 从冻结字典中删除该成功进入的账户
-                    self.__freeze_dict.pop(inquiry_account)
-                    # 返回真值
-                    return True
-                else:
-                    return True
-            # 账号对不上密码时,触发账号冻结计数,若该输错密码的账号不在冻结计数字典内,则向字典中添加
-            elif self.li_account[inquiry_account_index] not in self.__freeze_dict.keys():
-                self.__freeze_dict[inquiry_account] = self.__count
-                print('密码错误,还有%d次机会' % self.__freeze_dict[inquiry_account])
-            # 容错
+            # 先判断密码是否正确,再判断冻结次数
+            # 账户存在,密码正确
+            if inquiry_password == self.li_password[inquiry_account_index]:
+                # 当该账户存在冻结次数
+                if self.li_account[inquiry_account_index] in self.__freeze_dict.keys():
+                    # 检测冻结剩余次数是否为零,为零则不返回真值
+                    if self.__freeze_dict[inquiry_account] != 0:
+                        # 从冻结字典中删除该成功进入的账户
+                        self.__freeze_dict.pop(inquiry_account)
+                        # 返回真值
+                        return True
+                    # 账户有冻结计数且剩余次数不为零时
+                    else:
+                       print('账户%s已冻结' % inquiry_account)
+            # 账户存在,密码错误
             else:
-                pass
+                # 密码错误的账户不在冻结字典中
+                if self.li_account[inquiry_account_index] not in self.__freeze_dict.keys():
+                    self.__freeze_dict[inquiry_account] = self.__count
+                    print('密码错误,还有%d次机会' % self.__freeze_dict[inquiry_account])
+                # 密码错误的账户在冻结字典中
+                else:
+                    #如果该账户冻结计数为零,则进行下面的操作
+                    if self.__freeze_dict[inquiry_account] == 0:
+                        print('错误次数过多,账户%s已冻结' % inquiry_account)
+                    # 冻结字典中已存在该账户,且未冻结
+                    else:
+                        self.__freeze_dict[inquiry_account] -= 1
+                        if self.__freeze_dict[inquiry_account] == 0:
+                            print('错误次数过多,账户%s已冻结' % inquiry_account)
+                        else:
+                            print('密码错误,还有%d次机会' % self.__freeze_dict[inquiry_account])
 
     # 查询
     def inquiry(self, inquiry_account=''):
         # 获取账户的账号索引
         inquiry_account_index = self.li_account.index(inquiry_account)
-        print('账户%s还有%s元' % (self.li_account[inquiry_account_index],self.li_money[inquiry_account_index]))
+        print('账户%s还有%d元' % (self.li_account[inquiry_account_index],self.li_money[inquiry_account_index]))
 
     # 取款
     def withdraw(self, inquiry_account='', withdraw_money=''):
@@ -236,7 +242,7 @@ class Bank():
             # 获取账户的账号索引
             inquiry_account_index = self.li_account.index(inquiry_account)
             if inquiry_password == self.li_password[inquiry_account_index]:
-                self.__freeze_dict[inquiry_account] = 1
+                self.__freeze_dict[inquiry_account] = 0
                 print('账户%s已冻结' % inquiry_account)
             else:
                 print('密码不正确')
@@ -266,39 +272,60 @@ class Bank():
     def cunpan(self):
         # 保存 li_name
         with open(self.path + os.sep + 'li_name' + '.txt', 'w', encoding='utf-8') as file:
-            for i in self.li_name:
-                file.write(i+'\n')
+            try:
+                for i in self.li_name:
+                    file.write(i+'\n')
+            except:
+                pass
 
         # 保存 li_id_number
         with open(self.path + os.sep + 'li_id_number' + '.txt', 'w', encoding='utf-8') as file:
-            for i in self.li_id_number:
-                file.write(i+'\n')
+            try:
+                for i in self.li_id_number:
+                    file.write(i+'\n')
+            except:
+                pass
         
         # 保存 li_phonenumber
         with open(self.path + os.sep + 'li_phonenumber' + '.txt', 'w', encoding='utf-8') as file:
-            for i in self.li_phonenumber:
-                file.write(i+'\n')
-        
+            try:
+                for i in self.li_phonenumber:
+                    file.write(i+'\n')
+            except:
+                pass
+
         # 保存 li_account
         with open(self.path + os.sep + 'li_account' + '.txt', 'w', encoding='utf-8') as file:
-            for i in self.li_account:
-                file.write(i+'\n')
-        
+            try:
+                for i in self.li_account:
+                    file.write(i+'\n')
+            except:
+                pass
+            
         # 保存 li_password
         with open(self.path + os.sep + 'li_password' + '.txt', 'w', encoding='utf-8') as file:
-            for i in self.li_password:
-                file.write(i+'\n')
-        
+            try:
+                for i in self.li_password:
+                    file.write(i+'\n')
+            except:
+                pass
+
         # 保存 冻结字典键
         with open(self.path + os.sep + 'freeze_dict_keys' + '.txt', 'w', encoding='utf-8') as file:
-            for i in self.freeze_dict.keys():
-                file.write(i+'\n')
+            try:
+                for i in self.__freeze_dict.keys():
+                    file.write(i+'\n')
+            except:
+                pass
         
         # 保存 冻结字典值
         with open(self.path + os.sep + 'freeze_dict_values' + '.txt', 'w', encoding='utf-8') as file:
-            for i in self.freeze_dict.values():
-                file.write(str(i)+'\n')
-
+            try:
+                for i in self.__freeze_dict.values():
+                    file.write(str(i)+'\n')
+            except:
+                pass
+    
     #退出
     def bank_quit(self, ad_account='', ad_password=''):
         if ad_account == self.__ad_account and ad_password == self.__ad_password:
@@ -306,7 +333,7 @@ class Bank():
         else:
             return False
     
-#交互操作,以下部分以后可以用GUI界面代替
+# 交互操作,以下部分以后可以用GUI界面代替
 while True:
     ad_account = input('请输入管理员账户:')
     ad_password = input('请输入管理员密码:')
@@ -346,7 +373,7 @@ while bank.switch:
                 try:
                     money = int(money)
                     if money >= 0:
-                        continue
+                        pass
                     else:
                         print('金额不能为负')
                         quit_temp = 1
@@ -358,6 +385,7 @@ while bank.switch:
                 break
             if quit_temp != 1:
                 bank.open_account(name=name, id_number=id_number, phonenumber=phonenumber, money=money, password=password)
+                print('开户成功')
             else:
                 pass
 
