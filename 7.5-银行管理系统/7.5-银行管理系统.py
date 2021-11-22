@@ -5,8 +5,6 @@ import sys,os
 Exception ignored in: <function Bank.__del__ at 0x000001F474FD16C0>
 TypeError: Bank.__del__() missing 1 required positional argument: 'del_options'
 """
-
-
 class Bank():
     #类属性   
     __ad_account = 'admin'      #管理员账号
